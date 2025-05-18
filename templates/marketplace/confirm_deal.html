@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Confirm Deal{% endblock %}
+{% block content %}
+<h2>Confirm Deal for {{ listing.title|escape }}</h2>
+<p>Are you sure you want to confirm this deal? This will mark the listing as sold.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">Confirm Deal</button>
+    <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %} 

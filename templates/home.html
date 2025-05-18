@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home | GZU Online Marketplace{% endblock %}
+<meta name="description" content="Buy, sell, and trade items on the GZU Online Marketplace. Safe, local, and free for all GZU students and staff.">
+{% block content %}
+<!-- Hero Section -->
+<div class="row align-items-center my-5">
+    <div class="col-md-6">
+        <h1 class="display-4 fw-bold mb-3" style="color: var(--gzu-maroon);">Buy & Sell on Campus.<br>Fast. Secure. Local.</h1>
+        <p class="lead mb-4">The official Great Zimbabwe University student marketplace. Find deals, post items, and connect with fellow students across all GZU campuses.</p>
+        <form class="d-flex mb-3" method="get" action="/">
+            <input class="form-control me-2" type="search" name="q" placeholder="Search for books, electronics, services..." aria-label="Search">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+        <a href="/listing/create/" class="btn btn-success btn-lg">Post Your First Item</a>
+    </div>
+    <div class="col-md-6 text-center">
+        <img src="{% static 'img/gzu_logo.png' %}" alt="GZU Marketplace" class="img-fluid" style="max-height: 220px;" loading="lazy">
+    </div>
+</div>
+<!-- Featured Listings -->
+<h2 class="mb-4">Featured Listings</h2>
+<div class="row mb-5">
+    {% for listing in listings|slice:":6" %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 category-card">
+            {% if listing.image %}
+            <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title|escape }}" loading="lazy">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ listing.title|escape }}</h5>
+                <p class="card-text">${{ listing.price }}<br><span class="badge bg-secondary">{{ listing.campus|escape }}</span></p>
+                <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary">View</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No featured listings yet.</p>
+    {% endfor %}
+</div>
+<!-- Categories Section -->
+<h2 class="mb-4">Browse by Category</h2>
+<div class="row mb-5">
+    <div class="col-6 col-md-3 mb-3">
+        <a href="/?category=electronics" class="text-decoration-none" aria-label="Electronics category">
+            <div class="card category-card text-center p-4">
+                <span class="fs-1" aria-hidden="true">💻</span>
+                <div class="mt-2 fw-semibold">Electronics</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <a href="/?category=books" class="text-decoration-none" aria-label="Books category">
+            <div class="card category-card text-center p-4">
+                <span class="fs-1" aria-hidden="true">📚</span>
+                <div class="mt-2 fw-semibold">Books</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <a href="/?category=clothing" class="text-decoration-none" aria-label="Clothing category">
+            <div class="card category-card text-center p-4">
+                <span class="fs-1" aria-hidden="true">👕</span>
+                <div class="mt-2 fw-semibold">Clothing</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <a href="/?category=services" class="text-decoration-none" aria-label="Services category">
+            <div class="card category-card text-center p-4">
+                <span class="fs-1" aria-hidden="true">🛠️</span>
+                <div class="mt-2 fw-semibold">Services</div>
+            </div>
+        </a>
+    </div>
+</div>
+<!-- Why Use GZU Marketplace -->
+<h2 class="mb-4">Why Use GZU Marketplace?</h2>
+<div class="row text-center mb-5">
+    <div class="col-md-4 mb-3">
+        <div class="card category-card p-4">
+            <span class="fs-1">🔒</span>
+            <div class="fw-semibold mt-2">Secure Chat</div>
+            <div class="text-muted">Message safely within the platform</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card category-card p-4">
+            <span class="fs-1">📍</span>
+            <div class="fw-semibold mt-2">Local Deals</div>
+            <div class="text-muted">Find items on your campus</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card category-card p-4">
+            <span class="fs-1">💸</span>
+            <div class="fw-semibold mt-2">Free to Use</div>
+            <div class="text-muted">No fees, no hassle</div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

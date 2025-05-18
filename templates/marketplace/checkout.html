@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Checkout</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.listing.title }}</td>
+            <td>${{ item.listing.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.listing.price|floatformat:2|add:item.quantity|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<h4>Total: ${{ total }}</h4>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success btn-lg">Simulate Payment (Ecocash)</button>
+</form>
+<a href="{% url 'view_cart' %}" class="btn btn-secondary mt-3">Back to Cart</a>
+{% endblock %} 

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}{{ store_user.username|escape }}'s Store{% endblock %}
+{% block content %}
+<h2>{{ store_user.username|escape }}'s Store</h2>
+{% if store_user.userprofile.profile_pic %}
+<img src="{{ store_user.userprofile.profile_pic.url }}" alt="Profile Picture" class="img-thumbnail mb-3" style="max-width: 150px;">
+{% endif %}
+<p><strong>Bio:</strong> {{ store_user.userprofile.bio|linebreaksbr|escape }}</p>
+<p><strong>Contact:</strong> {{ store_user.userprofile.contact_number|escape }}</p>
+<h4 class="mt-4">Listings</h4>
+<div class="row">
+    {% for listing in listings %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 category-card">
+            {% if listing.image %}
+            <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title|escape }}" loading="lazy">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ listing.title|escape }}</h5>
+                <p class="card-text">${{ listing.price }}<br><span class="badge bg-secondary">{{ listing.campus|escape }}</span></p>
+                <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary">View</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No active listings.</p>
+    {% endfor %}
+</div>
+{% endblock %} 

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Message from {{ message.sender.username }}</h2>
+<p><strong>Listing:</strong> {% if message.listing %}<a href="{% url 'listing_detail' message.listing.pk %}">{{ message.listing.title }}</a>{% else %}N/A{% endif %}</p>
+<p><strong>Sent:</strong> {{ message.timestamp|date:"SHORT_DATETIME_FORMAT" }}</p>
+<div class="card mb-3">
+    <div class="card-body">
+        {{ message.content }}
+    </div>
+</div>
+<h5>Quick Replies:</h5>
+<div class="mb-3">
+    <button class="btn btn-outline-primary btn-sm me-2" onclick="copyToClipboard('Is this item still available?')">Is this item still available?</button>
+    <button class="btn btn-outline-primary btn-sm me-2" onclick="copyToClipboard('Can you provide more details?')">Can you provide more details?</button>
+    <button class="btn btn-outline-primary btn-sm me-2" onclick="copyToClipboard('What is your best price?')">What is your best price?</button>
+    <button class="btn btn-outline-primary btn-sm" onclick="copyToClipboard('Where can we meet?')">Where can we meet?</button>
+</div>
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text);
+    alert('Copied: ' + text);
+}
+</script>
+<a href="/messages/" class="btn btn-secondary">Back to Inbox</a>
+{% endblock %} 

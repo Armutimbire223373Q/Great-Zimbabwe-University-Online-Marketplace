@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{% if form.instance.pk %}Edit Listing{% else %}Create Listing{% endif %}</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {{ form.description }}
+    <div class="row">
+        <div class="col-md-4">{{ form.condition.label_tag }} {{ form.condition }}</div>
+        <div class="col-md-4">{{ form.tags.label_tag }} {{ form.tags }}</div>
+        <div class="col-md-4">{{ form.location.label_tag }} {{ form.location }}</div>
+    </div>
+    <h5>Images</h5>
+    {{ formset.management_form }}
+    <div class="row">
+        {% for image_form in formset %}
+        <div class="col-md-4 mb-2">
+            {{ image_form.image.label_tag }}
+            {{ image_form.image }}
+            {% if image_form.instance.image %}
+            <img src="{{ image_form.instance.image.url }}" class="img-thumbnail mt-1" style="max-height:100px;">
+            {% endif %}
+            {{ image_form.DELETE }} Delete
+        </div>
+        {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="/" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %} 

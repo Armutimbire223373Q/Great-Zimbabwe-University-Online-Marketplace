@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Login | GZU Online Marketplace{% endblock %}
+{% block content %}
+<h2>Login</h2>
+{% if messages %}
+<div class="mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+<form method="post" aria-label="Login form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+{% endblock %} 

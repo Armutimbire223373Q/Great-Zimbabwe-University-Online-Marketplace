@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ listing.title|escape }} | GZU Online Marketplace{% endblock %}
+{% block content %}
+<div class="row my-5">
+    <div class="col-md-6">
+        <!-- Image Gallery -->
+        {% if listing.images.all %}
+        <div class="mb-3">
+            <div class="row g-2">
+                {% for img in listing.images.all %}
+                <div class="col-4 col-md-3">
+                    <img src="{{ img.image.url }}" class="img-fluid rounded border" alt="{{ listing.title|escape }} image" loading="lazy">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% elif listing.image %}
+        <img src="{{ listing.image.url }}" class="img-fluid mb-3 rounded border" alt="{{ listing.title|escape }}" loading="lazy">
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h2 class="fw-bold mb-2">{{ listing.title|escape }}</h2>
+        <h4 class="text-success mb-3">${{ listing.price }}</h4>
+        <div class="mb-2">
+            <span class="badge bg-secondary">{{ listing.campus|escape }}</span>
+            {% if listing.premium %}<span class="badge bg-warning text-dark ms-2">Premium</span>{% endif %}
+        </div>
+        <div class="mb-3 text-muted">Category: {{ listing.get_category_display|escape }}</div>
+        <div class="mb-3 text-muted">Condition: {{ listing.get_condition_display }}</div>
+        <div class="mb-3 text-muted">Location: {{ listing.location|escape }}</div>
+        {% if listing.tags %}<div class="mb-3 text-muted">Tags: {{ listing.tags|escape }}</div>{% endif %}
+        <div class="mb-3">{{ listing.description|linebreaksbr|escape }}</div>
+        <div class="mb-3">
+            <span class="fw-semibold">Seller:</span> {{ listing.owner.username|escape }} (<a href="/seller/{{ listing.owner.id }}/">Other listings</a>)
+        </div>
+        <div class="mb-3">
+            {% if user.is_authenticated and user != listing.owner %}
+                <a href="/messages/send/{{ listing.owner.id }}/" class="btn btn-primary btn-lg mb-2">Message Seller</a>
+                {% if is_favorite %}
+                    <a href="{% url 'remove_favorite' listing.pk %}" class="btn btn-outline-danger btn-lg mb-2">Remove from Favorites</a>
+                {% else %}
+                    <a href="{% url 'add_favorite' listing.pk %}" class="btn btn-outline-success btn-lg mb-2">Add to Favorites</a>
+                {% endif %}
+                <a href="{% url 'add_to_cart' listing.pk %}" class="btn btn-outline-success btn-lg mb-2">Add to Cart</a>
+                <a href="{% url 'report_listing' listing.pk %}" class="btn btn-outline-danger btn-lg mb-2">Report Listing</a>
+                <a href="{% url 'make_offer' listing.pk %}" class="btn btn-outline-info btn-lg mb-2">Make Offer</a>
+                <a href="{% url 'confirm_deal' listing.pk %}" class="btn btn-success btn-lg mb-2">Confirm Deal</a>
+            {% endif %}
+            {% if user == listing.owner %}
+                <a href="{% url 'edit_listing' listing.pk %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'delete_listing' listing.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this listing?');">Delete</a>
+                <a href="{% url 'mark_listing_status' listing.pk 'sold' %}" class="btn btn-danger">Mark as Sold</a>
+                <a href="{% url 'mark_listing_status' listing.pk 'active' %}" class="btn btn-secondary">Mark as Available</a>
+                <h5 class="mt-3">Offers:</h5>
+                <ul>
+                {% for offer in listing.offers.all %}
+                    <li>{{ offer.sender.username }} offered ${{ offer.amount }} - {{ offer.message|default:'No message' }} {% if offer.accepted %}(Accepted){% elif offer.accepted is not None %}(Rejected){% endif %}</li>
+                {% empty %}<li>No offers yet.</li>{% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <a href="/" class="btn btn-secondary">Back to Listings</a>
+    </div>
+</div>
+{% if messages %}
+<div class="mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %} 

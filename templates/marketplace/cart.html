@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>My Cart</h2>
+{% if items %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td><a href="{% url 'listing_detail' item.listing.pk %}">{{ item.listing.title }}</a></td>
+            <td>${{ item.listing.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.listing.price|floatformat:2|add:item.quantity|floatformat:2 }}</td>
+            <td><a href="{% url 'remove_from_cart' item.listing.pk %}" class="btn btn-danger btn-sm">Remove</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<h4>Total: ${{ total }}</h4>
+<a href="{% url 'checkout' %}" class="btn btn-success btn-lg">Proceed to Checkout</a>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+<a href="/" class="btn btn-secondary mt-3">Back to Marketplace</a>
+{% endblock %} 

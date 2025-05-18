@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Post Event/Gig{% endblock %}
+{% block content %}
+<h2>Post a New Event or Gig</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Post</button>
+    <a href="{% url 'browse_events_gigs' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %} 

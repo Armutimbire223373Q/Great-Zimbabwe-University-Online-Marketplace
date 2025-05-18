@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Report{% endblock %}
+{% block content %}
+<h2>Report {% if listing %}Listing: {{ listing.title|escape }}{% elif reported_user %}User: {{ reported_user.username|escape }}{% endif %}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-danger">Submit Report</button>
+    <a href="{% if listing %}{% url 'listing_detail' listing.pk %}{% else %}{% url 'profile' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %} 

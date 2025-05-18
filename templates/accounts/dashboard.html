@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | GZU Online Marketplace{% endblock %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card p-3 mb-3">
+            <h5 class="fw-bold">Profile Overview</h5>
+            <p class="mb-1"><strong>Username:</strong> {{ user.username|escape }}</p>
+            <p class="mb-1"><strong>Email:</strong> {{ user.email|escape }}</p>
+            <p class="mb-1"><strong>Campus:</strong> {{ user.userprofile.campus|escape }}</p>
+            <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-sm mt-2">View Profile</a>
+        </div>
+        <div class="card p-3 mb-3">
+            <h6 class="fw-bold">Quick Links</h6>
+            <a href="/listing/create/" class="btn btn-success btn-sm mb-2 w-100">Post New Listing</a>
+            <a href="/favorites/" class="btn btn-outline-secondary btn-sm mb-2 w-100">Wishlist</a>
+            <a href="/messages/" class="btn btn-outline-secondary btn-sm mb-2 w-100">Messages</a>
+            <a href="/cart/" class="btn btn-outline-secondary btn-sm w-100">Cart</a>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="card p-4 mb-4">
+            <h5 class="fw-bold mb-3">My Listings</h5>
+            {% if user.listings.all %}
+            <div class="row">
+                {% for listing in user.listings.all %}
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 category-card">
+                        {% if listing.image %}
+                        <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title|escape }}" loading="lazy">
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title">{{ listing.title|escape }}</h6>
+                            <p class="mb-1">${{ listing.price }} <span class="badge bg-secondary ms-2">{{ listing.campus|escape }}</span></p>
+                            <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary btn-sm">View</a>
+                            <a href="{% url 'edit_listing' listing.pk %}" class="btn btn-warning btn-sm ms-2">Edit</a>
+                            <a href="{% url 'delete_listing' listing.pk %}" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Are you sure you want to delete this listing?');">Delete</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>You have not posted any listings yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% if messages %}
+<div class="mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %} 
