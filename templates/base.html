@@ -5,79 +5,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}GZU Online Marketplace{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top" aria-label="Main navigation">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="/">
-            <img src="{% static 'img/gzu_logo.png' %}" alt="GZU Logo" loading="lazy">
-            <span>GZU Marketplace</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="/">Browse</a></li>
-                <li class="nav-item"><a class="nav-link" href="/listing/create/">Post Item</a></li>
-                {% if user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link" href="/messages/">Messages</a></li>
-                <li class="nav-item"><a class="nav-link position-relative" href="/notifications/">Notifications <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.7em;">•</span></a></li>
-                <li class="nav-item"><a class="nav-link" href="/accounts/profile/">Profile</a></li>
-                <li class="nav-item">
-                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:0; border:none; background:none;">Logout</button>
-                    </form>
-                </li>
-                {% else %}
-                <li class="nav-item"><a class="nav-link" href="/accounts/login/">Login</a></li>
-                <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
-                {% endif %}
-            </ul>
-            <form class="d-flex ms-3" method="get" action="/" aria-label="Campus filter form">
-                <select class="form-select me-2" name="campus" style="max-width: 180px;">
-                    <option value="">All Campuses</option>
-                    <option>Masvingo-Main Campus</option>
-                    <option>Mucheke Campus</option>
-                    <option>Masvingo-City Campus</option>
-                    <option>Mashava Campus</option>
-                    <option>Harare Campus</option>
-                    <option>Bulawayo Campus</option>
-                    <option>Chiredzi Cohort</option>
-                </select>
-                <button class="btn btn-primary" type="submit">Go</button>
-            </form>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'img/gzu_logo.png' %}" alt="GZU Logo" height="40">
+                GZU Marketplace
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'marketplace:product_list' %}">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'marketplace:categories' %}">Categories</a>
+                    </li>
+                </ul>
+                <form class="d-flex mx-3" action="{% url 'marketplace:search' %}" method="get">
+                    <input class="form-control me-2" type="search" placeholder="Search products..." name="q">
+                    <button class="btn btn-light" type="submit">Search</button>
+                </form>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'marketplace:cart' %}">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="badge bg-danger">{{ user.cart.items.count }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i> {{ user.email }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'marketplace:my_listings' %}">My Listings</a></li>
+                                <li><a class="dropdown-item" href="{% url 'marketplace:orders' %}">Orders</a></li>
+                                <li><a class="dropdown-item" href="{% url 'messages:inbox' %}">Messages</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
-<div class="container">
+    </nav>
+
+    <!-- Messages -->
     {% if messages %}
-    <div class="mt-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
     {% endif %}
-    {% block content %}{% endblock %}
-</div>
-<footer class="text-center mt-5" aria-label="Site footer">
-    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-center">
-        <img src="{% static 'img/gzu_logo.png' %}" alt="GZU Logo" class="footer-logo" loading="lazy">
-        <span>Great Zimbabwe University &mdash; Knowledge • Culture • Development</span>
-    </div>
-    <div class="mt-2">
-        <small>&copy; {{ now|date:'Y' }} GZU Online Marketplace. All rights reserved. | <a href="#" class="text-light">About</a> | <a href="#" class="text-light">Contact</a> | <a href="#" class="text-light">FAQ</a> | <a href="#" class="text-light">Terms</a></small>
-    </div>
-</footer>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>About GZU Marketplace</h5>
+                    <p>A platform for Great Zimbabwe University students and staff to buy, sell, and exchange items within the university community.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'home' %}" class="text-light">Home</a></li>
+                        <li><a href="{% url 'marketplace:product_list' %}" class="text-light">Products</a></li>
+                        <li><a href="{% url 'marketplace:categories' %}" class="text-light">Categories</a></li>
+                        <li><a href="#" class="text-light">About Us</a></li>
+                        <li><a href="#" class="text-light">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <address>
+                        <p><i class="fas fa-map-marker-alt"></i> Great Zimbabwe University<br>
+                        Masvingo, Zimbabwe</p>
+                        <p><i class="fas fa-phone"></i> +263 123 456 789</p>
+                        <p><i class="fas fa-envelope"></i> marketplace@gzu.ac.zw</p>
+                    </address>
+                </div>
+            </div>
+            <hr class="bg-light">
+            <div class="text-center">
+                <p>&copy; {% now "Y" %} GZU Marketplace. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html> 

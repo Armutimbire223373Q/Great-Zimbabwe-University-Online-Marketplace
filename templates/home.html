@@ -1,102 +1,143 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Home | GZU Online Marketplace{% endblock %}
-<meta name="description" content="Buy, sell, and trade items on the GZU Online Marketplace. Safe, local, and free for all GZU students and staff.">
+
+{% block title %}Welcome to GZU Online Marketplace{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
-<div class="row align-items-center my-5">
-    <div class="col-md-6">
-        <h1 class="display-4 fw-bold mb-3" style="color: var(--gzu-maroon);">Buy & Sell on Campus.<br>Fast. Secure. Local.</h1>
-        <p class="lead mb-4">The official Great Zimbabwe University student marketplace. Find deals, post items, and connect with fellow students across all GZU campuses.</p>
-        <form class="d-flex mb-3" method="get" action="/">
-            <input class="form-control me-2" type="search" name="q" placeholder="Search for books, electronics, services..." aria-label="Search">
-            <button class="btn btn-primary" type="submit">Search</button>
-        </form>
-        <a href="/listing/create/" class="btn btn-success btn-lg">Post Your First Item</a>
-    </div>
-    <div class="col-md-6 text-center">
-        <img src="{% static 'img/gzu_logo.png' %}" alt="GZU Marketplace" class="img-fluid" style="max-height: 220px;" loading="lazy">
-    </div>
-</div>
-<!-- Featured Listings -->
-<h2 class="mb-4">Featured Listings</h2>
-<div class="row mb-5">
-    {% for listing in listings|slice:":6" %}
-    <div class="col-md-4 mb-3">
-        <div class="card h-100 category-card">
-            {% if listing.image %}
-            <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title|escape }}" loading="lazy">
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ listing.title|escape }}</h5>
-                <p class="card-text">${{ listing.price }}<br><span class="badge bg-secondary">{{ listing.campus|escape }}</span></p>
-                <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary">View</a>
+<div class="bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 fw-bold">Welcome to GZU Online Marketplace</h1>
+                <p class="lead">Buy, sell, and exchange items within the Great Zimbabwe University community.</p>
+                {% if not user.is_authenticated %}
+                    <div class="mt-4">
+                        <a href="{% url 'account_signup' %}" class="btn btn-light btn-lg me-3">Get Started</a>
+                        <a href="{% url 'account_login' %}" class="btn btn-outline-light btn-lg">Login</a>
+                    </div>
+                {% else %}
+                    <a href="{% url 'marketplace:product_create' %}" class="btn btn-light btn-lg mt-4">Post an Item</a>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <img src="{% static 'img/marketplace-hero.png' %}" alt="Marketplace" class="img-fluid rounded shadow">
             </div>
         </div>
     </div>
-    {% empty %}
-    <p>No featured listings yet.</p>
-    {% endfor %}
 </div>
-<!-- Categories Section -->
-<h2 class="mb-4">Browse by Category</h2>
-<div class="row mb-5">
-    <div class="col-6 col-md-3 mb-3">
-        <a href="/?category=electronics" class="text-decoration-none" aria-label="Electronics category">
-            <div class="card category-card text-center p-4">
-                <span class="fs-1" aria-hidden="true">💻</span>
-                <div class="mt-2 fw-semibold">Electronics</div>
+
+<!-- Featured Categories -->
+<section class="mb-5">
+    <div class="container">
+        <h2 class="mb-4">Browse Categories</h2>
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-md-4 col-lg-3">
+                <a href="{% url 'marketplace:category_detail' category.slug %}" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas {{ category.icon }} fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title text-dark">{{ category.name }}</h5>
+                            <p class="card-text text-muted">{{ category.products.count }} items</p>
+                        </div>
+                    </div>
+                </a>
             </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-        <a href="/?category=books" class="text-decoration-none" aria-label="Books category">
-            <div class="card category-card text-center p-4">
-                <span class="fs-1" aria-hidden="true">📚</span>
-                <div class="mt-2 fw-semibold">Books</div>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-        <a href="/?category=clothing" class="text-decoration-none" aria-label="Clothing category">
-            <div class="card category-card text-center p-4">
-                <span class="fs-1" aria-hidden="true">👕</span>
-                <div class="mt-2 fw-semibold">Clothing</div>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-        <a href="/?category=services" class="text-decoration-none" aria-label="Services category">
-            <div class="card category-card text-center p-4">
-                <span class="fs-1" aria-hidden="true">🛠️</span>
-                <div class="mt-2 fw-semibold">Services</div>
-            </div>
-        </a>
-    </div>
-</div>
-<!-- Why Use GZU Marketplace -->
-<h2 class="mb-4">Why Use GZU Marketplace?</h2>
-<div class="row text-center mb-5">
-    <div class="col-md-4 mb-3">
-        <div class="card category-card p-4">
-            <span class="fs-1">🔒</span>
-            <div class="fw-semibold mt-2">Secure Chat</div>
-            <div class="text-muted">Message safely within the platform</div>
+            {% endfor %}
         </div>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card category-card p-4">
-            <span class="fs-1">📍</span>
-            <div class="fw-semibold mt-2">Local Deals</div>
-            <div class="text-muted">Find items on your campus</div>
+</section>
+
+<!-- Featured Products -->
+<section class="mb-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Featured Products</h2>
+            <a href="{% url 'marketplace:product_list' %}" class="btn btn-outline-primary">View All</a>
+        </div>
+        <div class="row g-4">
+            {% for product in featured_products %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    {% if product.images.exists %}
+                        <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.title }}">
+                    {% else %}
+                        <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="No image available">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.title }}</h5>
+                        <p class="card-text text-muted">{{ product.description|truncatewords:20 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">${{ product.price }}</span>
+                            <a href="{% url 'marketplace:product_detail' product.slug %}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card category-card p-4">
-            <span class="fs-1">💸</span>
-            <div class="fw-semibold mt-2">Free to Use</div>
-            <div class="text-muted">No fees, no hassle</div>
+</section>
+
+<!-- How It Works -->
+<section class="bg-light py-5 mb-5">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                    <h4>Create an Account</h4>
+                    <p>Sign up with your GZU email to join our community marketplace.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-camera fa-3x text-primary mb-3"></i>
+                    <h4>Post Your Items</h4>
+                    <p>List your items for sale with photos and descriptions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-handshake fa-3x text-primary mb-3"></i>
+                    <h4>Buy and Sell</h4>
+                    <p>Connect with buyers and sellers within the GZU community.</p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Latest Listings -->
+<section class="mb-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Latest Listings</h2>
+            <a href="{% url 'marketplace:product_list' %}" class="btn btn-outline-primary">View All</a>
+        </div>
+        <div class="row g-4">
+            {% for product in latest_products %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    {% if product.images.exists %}
+                        <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.title }}">
+                    {% else %}
+                        <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="No image available">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.title }}</h5>
+                        <p class="card-text text-muted">{{ product.description|truncatewords:20 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">${{ product.price }}</span>
+                            <a href="{% url 'marketplace:product_detail' product.slug %}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {% endblock %} 
