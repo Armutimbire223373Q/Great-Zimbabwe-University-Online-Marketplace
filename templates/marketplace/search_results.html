@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Search Results</h1>
+    
+    {% if query %}
+        <p class="lead">Showing results for "{{ query }}"</p>
+    {% endif %}
+    
+    {% if listings %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for listing in listings %}
+                <div class="col">
+                    <div class="card h-100">
+                        {% if listing.images.first %}
+                            <img src="{{ listing.images.first.image.url }}" class="card-img-top" alt="{{ listing.title }}">
+                        {% else %}
+                            <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="No image available">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ listing.title }}</h5>
+                            <p class="card-text">{{ listing.description|truncatewords:20 }}</p>
+                            <p class="card-text"><strong>Price: ${{ listing.price }}</strong></p>
+                            <a href="{% url 'marketplace:listing_detail' listing.pk %}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            {% if query %}
+                No listings found matching "{{ query }}".
+            {% else %}
+                Please enter a search term.
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

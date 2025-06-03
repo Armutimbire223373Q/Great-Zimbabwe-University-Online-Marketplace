@@ -1,0 +1,230 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth %}
+{% load account socialaccount %}
+{% load static %}
+
+{% block head_title %}
+    {% trans "Sign In" %}
+{% endblock head_title %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .login-card {
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .login-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .social-btn {
+        transition: all 0.3s ease;
+        border-width: 2px;
+    }
+    .social-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .social-btn i {
+        transition: transform 0.3s ease;
+    }
+    .social-btn:hover i {
+        transform: scale(1.2);
+    }
+    .btn-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #1976D2, #1565C0);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .form-control {
+        transition: all 0.3s ease;
+        border: 2px solid #e9ecef;
+    }
+    .form-control:focus {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border-color: #2196F3;
+    }
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .divider span {
+        padding: 0 10px;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .form-check-input:checked {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .form-check-input:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.25rem rgba(33, 150, 243, 0.25);
+    }
+    .forgot-password {
+        color: #2196F3;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .forgot-password:hover {
+        color: #1976D2;
+        text-decoration: underline;
+    }
+    .register-link {
+        color: #2196F3;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .register-link:hover {
+        color: #1976D2;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block inner_content %}
+<div class="text-center mb-4">
+    <h1 class="h3">{% trans "Welcome Back!" %}</h1>
+    <p class="text-muted">{% trans "Please sign in to continue" %}</p>
+</div>
+
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+<div class="social-buttons">
+    {% for provider in socialaccount_providers %}
+        {% if provider.id == "google" %}
+            <a href="{% provider_login_url provider.id process='login' %}" class="btn btn-light social-btn">
+                <i class="fab fa-google text-danger"></i>
+                {% trans "Continue with Google" %}
+            </a>
+        {% elif provider.id == "facebook" %}
+            <a href="{% provider_login_url provider.id process='login' %}" class="btn btn-light social-btn">
+                <i class="fab fa-facebook text-primary"></i>
+                {% trans "Continue with Facebook" %}
+            </a>
+        {% else %}
+            <a href="{% provider_login_url provider.id process='login' %}" class="btn btn-light social-btn">
+                {% trans "Continue with" %} {{ provider.name }}
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div class="divider">
+    <span>{% trans "or" %}</span>
+</div>
+{% endif %}
+
+<form class="login" method="POST" action="{% url 'account_login' %}">
+    {% csrf_token %}
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <div class="mb-3">
+        <label for="id_login" class="form-label">{% trans "Email" %}</label>
+        <input type="email" name="login" id="id_login" class="form-control" placeholder="{% trans 'Enter your email' %}" required>
+    </div>
+
+    <div class="mb-3 position-relative">
+        <label for="id_password" class="form-label">{% trans "Password" %}</label>
+        <input type="password" name="password" id="id_password" class="form-control" placeholder="{% trans 'Enter your password' %}" required>
+        <span class="password-toggle">
+            <i class="fas fa-eye"></i>
+        </span>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input type="checkbox" name="remember" id="id_remember" class="form-check-input">
+        <label for="id_remember" class="form-check-label">{% trans "Remember me" %}</label>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="d-grid gap-2">
+        <button class="btn btn-primary btn-auth" type="submit">{% trans "Sign In" %}</button>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'account_reset_password' %}" class="text-decoration-none">{% trans "Forgot Password?" %}</a>
+    </div>
+</form>
+
+<div class="text-center mt-4">
+    <p class="mb-0">{% trans "Don't have an account?" %} <a href="{% url 'account_signup' %}" class="text-decoration-none">{% trans "Sign Up" %}</a></p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add Bootstrap classes to form fields
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+        inputs.forEach(input => {
+            input.classList.add('form-control');
+            const parent = input.parentElement;
+            if (parent && !parent.classList.contains('form-floating')) {
+                parent.classList.add('form-floating', 'mb-3');
+                const label = document.createElement('label');
+                label.setAttribute('for', input.id);
+                label.textContent = input.placeholder || input.name.charAt(0).toUpperCase() + input.name.slice(1);
+                parent.appendChild(label);
+            }
+        });
+
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+
+        // Add animation to social buttons
+        const socialButtons = document.querySelectorAll('.social-btn');
+        socialButtons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.style.transform = 'scale(1.2)';
+                }
+            });
+            button.addEventListener('mouseleave', function() {
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.style.transform = 'scale(1)';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

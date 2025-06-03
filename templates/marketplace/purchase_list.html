@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}My Purchases{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h1 class="h3 mb-4">My Purchases</h1>
+                    
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="purchaseTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">
+                                All Purchases
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="buying-tab" data-bs-toggle="tab" data-bs-target="#buying" type="button" role="tab" aria-controls="buying" aria-selected="false">
+                                As Buyer
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="selling-tab" data-bs-toggle="tab" data-bs-target="#selling" type="button" role="tab" aria-controls="selling" aria-selected="false">
+                                As Seller
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="purchaseTabsContent">
+                        <!-- All Purchases -->
+                        <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                            {% if purchases %}
+                                <div class="list-group">
+                                    {% for purchase in purchases %}
+                                        <a href="{% url 'marketplace:purchase_detail' purchase.id %}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="mb-1">{{ purchase.listing.title }}</h5>
+                                                    <p class="mb-1 text-muted">
+                                                        {% if request.user == purchase.buyer %}
+                                                            Seller: {{ purchase.seller.get_full_name }}
+                                                        {% else %}
+                                                            Buyer: {{ purchase.buyer.get_full_name }}
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="badge {% if purchase.status == 'pending' %}bg-warning{% elif purchase.status == 'completed' %}bg-success{% elif purchase.status == 'cancelled' %}bg-danger{% endif %}">
+                                                        {{ purchase.status|title }}
+                                                    </span>
+                                                    <div class="text-muted small mt-1">
+                                                        {{ purchase.created_at|naturaltime }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No purchases found.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- As Buyer -->
+                        <div class="tab-pane fade" id="buying" role="tabpanel" aria-labelledby="buying-tab">
+                            {% if as_buyer %}
+                                <div class="list-group">
+                                    {% for purchase in as_buyer %}
+                                        <a href="{% url 'marketplace:purchase_detail' purchase.id %}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="mb-1">{{ purchase.listing.title }}</h5>
+                                                    <p class="mb-1 text-muted">Seller: {{ purchase.seller.get_full_name }}</p>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="badge {% if purchase.status == 'pending' %}bg-warning{% elif purchase.status == 'completed' %}bg-success{% elif purchase.status == 'cancelled' %}bg-danger{% endif %}">
+                                                        {{ purchase.status|title }}
+                                                    </span>
+                                                    <div class="text-muted small mt-1">
+                                                        {{ purchase.created_at|naturaltime }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No purchases as buyer found.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- As Seller -->
+                        <div class="tab-pane fade" id="selling" role="tabpanel" aria-labelledby="selling-tab">
+                            {% if as_seller %}
+                                <div class="list-group">
+                                    {% for purchase in as_seller %}
+                                        <a href="{% url 'marketplace:purchase_detail' purchase.id %}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="mb-1">{{ purchase.listing.title }}</h5>
+                                                    <p class="mb-1 text-muted">Buyer: {{ purchase.buyer.get_full_name }}</p>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="badge {% if purchase.status == 'pending' %}bg-warning{% elif purchase.status == 'completed' %}bg-success{% elif purchase.status == 'cancelled' %}bg-danger{% endif %}">
+                                                        {{ purchase.status|title }}
+                                                    </span>
+                                                    <div class="text-muted small mt-1">
+                                                        {{ purchase.created_at|naturaltime }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No purchases as seller found.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

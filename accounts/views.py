@@ -10,22 +10,17 @@ from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
+from .models import CustomUser
 
 # Create your views here.
 
 def register(request):
     if request.method == 'POST':
-        user_form = UserRegisterForm(request.POST)
-        profile_form = UserProfileForm(request.POST, request.FILES)
-        if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save(commit=False)
+        form = UserRegisterForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save(commit=False)
             user.is_active = False  # Require email verification
             user.save()
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.save()
             # Send verification email
             current_site = get_current_site(request)
             subject = 'Activate your GZU Marketplace account'
@@ -41,21 +36,19 @@ def register(request):
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
-        user_form = UserRegisterForm()
-        profile_form = UserProfileForm()
-    return render(request, 'accounts/register.html', {'user_form': user_form, 'profile_form': profile_form})
+        form = UserRegisterForm()
+    return render(request, 'accounts/register.html', {'form': form})
 
 def activate(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = CustomUser.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
+        user.is_email_verified = True
         user.save()
-        user.userprofile.is_email_verified = True
-        user.userprofile.save()
         messages.success(request, 'Your account has been verified. You can now log in.')
         return redirect('login')
     else:
@@ -64,12 +57,7 @@ def activate(request, uidb64, token):
 
 @login_required
 def profile(request):
-    try:
-        profile = request.user.userprofile
-    except ObjectDoesNotExist:
-        from .models import UserProfile
-        profile = UserProfile.objects.create(user=request.user, campus='', contact_number='')
-    return render(request, 'accounts/profile.html', {'profile': profile})
+    return render(request, 'accounts/profile.html', {'user': request.user})
 
 @login_required
 def dashboard(request):
@@ -77,13 +65,12 @@ def dashboard(request):
 
 @login_required
 def edit_profile(request):
-    profile = request.user.userprofile
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
-            return redirect('profile')
+            return redirect('accounts:profile')
     else:
-        form = UserProfileForm(instance=profile)
+        form = UserProfileForm(instance=request.user)
     return render(request, 'accounts/edit_profile.html', {'form': form})

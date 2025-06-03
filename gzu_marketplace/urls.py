@@ -18,15 +18,22 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import TemplateView
+from marketplace.views import home, seller_listings  # Import specific views
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
-    path('accounts/', include('allauth.urls')),
+    path('', home, name='home'),
+    path('accounts/', include('allauth.urls')),  # AllAuth handles all authentication
+    path('accounts/', include('accounts.urls', namespace='accounts')),  # Custom accounts URLs
     path('marketplace/', include('marketplace.urls')),
-    path('messages/', include('messaging.urls')),
-    path('profile/', include('accounts.urls')),
+    path('messaging/', include('messaging.urls')),
+    path('seller/<int:seller_id>/', seller_listings, name='seller_listings'),
+    
+    # API Documentation
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 if settings.DEBUG:

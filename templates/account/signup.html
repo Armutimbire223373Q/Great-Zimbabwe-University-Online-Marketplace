@@ -1,0 +1,194 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign Up" %}{% endblock %}
+
+{% block inner_content %}
+<div class="text-center mb-4">
+    <h1 class="h3">{% trans "Create Account" %}</h1>
+    <p class="text-muted">{% trans "Join GZU Marketplace today" %}</p>
+</div>
+
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+<div class="social-buttons">
+    {% for provider in socialaccount_providers %}
+        {% if provider.id == "google" %}
+            <a href="{% provider_login_url provider.id process='signup' %}" class="btn btn-light social-btn">
+                <i class="fab fa-google text-danger"></i>
+                {% trans "Continue with Google" %}
+            </a>
+        {% elif provider.id == "facebook" %}
+            <a href="{% provider_login_url provider.id process='signup' %}" class="btn btn-light social-btn">
+                <i class="fab fa-facebook text-primary"></i>
+                {% trans "Continue with Facebook" %}
+            </a>
+        {% else %}
+            <a href="{% provider_login_url provider.id process='signup' %}" class="btn btn-light social-btn">
+                {% trans "Continue with" %} {{ provider.name }}
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div class="divider">
+    <span>{% trans "or" %}</span>
+</div>
+{% endif %}
+
+<form class="signup" method="POST" action="{% url 'account_signup' %}">
+    {% csrf_token %}
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="id_first_name" class="form-label">{% trans "First Name" %}</label>
+            <input type="text" name="first_name" id="id_first_name" class="form-control" placeholder="{% trans 'Enter your first name' %}" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="id_last_name" class="form-label">{% trans "Last Name" %}</label>
+            <input type="text" name="last_name" id="id_last_name" class="form-control" placeholder="{% trans 'Enter your last name' %}" required>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="id_email" class="form-label">{% trans "Email" %}</label>
+        <input type="email" name="email" id="id_email" class="form-control" placeholder="{% trans 'Enter your email' %}" required>
+        <div class="form-text">{% trans "Use your school email address (.ac.zw)" %}</div>
+    </div>
+
+    <div class="mb-3">
+        <label for="id_campus" class="form-label">{% trans "Campus" %}</label>
+        <select name="campus" id="id_campus" class="form-select" required>
+            <option value="">{% trans "Select your campus" %}</option>
+            <option value="main">{% trans "Main Campus" %}</option>
+            <option value="mashava">{% trans "Mashava Campus" %}</option>
+            <option value="mucheke">{% trans "Mucheke Campus" %}</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="id_student_id" class="form-label">{% trans "Student ID" %}</label>
+        <input type="text" name="student_id" id="id_student_id" class="form-control" placeholder="{% trans 'Enter your student ID' %}">
+    </div>
+
+    <div class="mb-3">
+        <label for="id_phone_number" class="form-label">{% trans "Phone Number" %}</label>
+        <input type="tel" name="phone_number" id="id_phone_number" class="form-control" placeholder="{% trans 'Enter your phone number' %}">
+    </div>
+
+    <div class="mb-3 position-relative">
+        <label for="id_password1" class="form-label">{% trans "Password" %}</label>
+        <input type="password" name="password1" id="id_password1" class="form-control" placeholder="{% trans 'Create a password' %}" required>
+        <span class="password-toggle">
+            <i class="fas fa-eye"></i>
+        </span>
+        <div class="form-text">
+            <div class="password-strength mt-2">
+                <div class="progress" style="height: 5px;">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <small class="password-feedback text-muted"></small>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3 position-relative">
+        <label for="id_password2" class="form-label">{% trans "Confirm Password" %}</label>
+        <input type="password" name="password2" id="id_password2" class="form-control" placeholder="{% trans 'Confirm your password' %}" required>
+        <span class="password-toggle">
+            <i class="fas fa-eye"></i>
+        </span>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="d-grid gap-2">
+        <button class="btn btn-primary btn-auth" type="submit">{% trans "Create Account" %}</button>
+    </div>
+</form>
+
+<div class="text-center mt-4">
+    <p class="mb-0">{% trans "Already have an account?" %} <a href="{% url 'account_login' %}" class="text-decoration-none">{% trans "Sign In" %}</a></p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    const progressBar = document.querySelector('.progress-bar');
+    const feedback = document.querySelector('.password-feedback');
+
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        let feedback = [];
+
+        if (password.length >= 8) strength += 25;
+        else feedback.push('At least 8 characters');
+
+        if (password.match(/[A-Z]/)) strength += 25;
+        else feedback.push('One uppercase letter');
+
+        if (password.match(/[a-z]/)) strength += 25;
+        else feedback.push('One lowercase letter');
+
+        if (password.match(/[0-9]/)) strength += 25;
+        else feedback.push('One number');
+
+        return { strength, feedback };
+    }
+
+    function updatePasswordStrength() {
+        const password = password1.value;
+        const { strength, feedback } = checkPasswordStrength(password);
+
+        progressBar.style.width = strength + '%';
+        
+        if (strength <= 25) {
+            progressBar.className = 'progress-bar bg-danger';
+        } else if (strength <= 50) {
+            progressBar.className = 'progress-bar bg-warning';
+        } else if (strength <= 75) {
+            progressBar.className = 'progress-bar bg-info';
+        } else {
+            progressBar.className = 'progress-bar bg-success';
+        }
+
+        if (password) {
+            feedback.textContent = feedback.join(', ');
+        } else {
+            feedback.textContent = '';
+        }
+    }
+
+    function checkPasswordMatch() {
+        if (password2.value && password1.value !== password2.value) {
+            password2.setCustomValidity("Passwords don't match");
+        } else {
+            password2.setCustomValidity('');
+        }
+    }
+
+    password1.addEventListener('input', updatePasswordStrength);
+    password2.addEventListener('input', checkPasswordMatch);
+});
+</script>
+{% endblock %} 

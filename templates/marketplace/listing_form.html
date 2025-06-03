@@ -1,30 +1,135 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 {% block content %}
-<h2>{% if form.instance.pk %}Edit Listing{% else %}Create Listing{% endif %}</h2>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {{ form.description }}
-    <div class="row">
-        <div class="col-md-4">{{ form.condition.label_tag }} {{ form.condition }}</div>
-        <div class="col-md-4">{{ form.tags.label_tag }} {{ form.tags }}</div>
-        <div class="col-md-4">{{ form.location.label_tag }} {{ form.location }}</div>
-    </div>
-    <h5>Images</h5>
-    {{ formset.management_form }}
-    <div class="row">
-        {% for image_form in formset %}
-        <div class="col-md-4 mb-2">
-            {{ image_form.image.label_tag }}
-            {{ image_form.image }}
-            {% if image_form.instance.image %}
-            <img src="{{ image_form.instance.image.url }}" class="img-thumbnail mt-1" style="max-height:100px;">
-            {% endif %}
-            {{ image_form.DELETE }} Delete
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">{% if form.instance.pk %}<i class="fas fa-edit me-2"></i>Edit Listing{% else %}<i class="fas fa-plus me-2"></i>Create Listing{% endif %}</h3>
         </div>
-        {% endfor %}
+        <div class="card-body">
+          {% if form.errors %}
+          <div class="alert alert-danger">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Please correct the following errors:</h5>
+            <ul class="mb-0">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <li>{{ field|title }}: {{ error }}</li>
+                {% endfor %}
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+          
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ form.title.label }} <span class="text-danger">*</span></label>
+                {{ form.title|add_class:'form-control' }}
+                {% if form.title.errors %}
+                <div class="invalid-feedback d-block">{{ form.title.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.category.label }} <span class="text-danger">*</span></label>
+                {{ form.category|add_class:'form-select' }}
+                {% if form.category.errors %}
+                <div class="invalid-feedback d-block">{{ form.category.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ form.description.label }} <span class="text-danger">*</span></label>
+              {{ form.description|add_class:'form-control' }}
+              {% if form.description.errors %}
+              <div class="invalid-feedback d-block">{{ form.description.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label">{{ form.condition.label }}</label>
+                {{ form.condition|add_class:'form-select' }}
+                {% if form.condition.errors %}
+                <div class="invalid-feedback d-block">{{ form.condition.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ form.tags.label }}</label>
+                {{ form.tags|add_class:'form-control' }}
+                {% if form.tags.errors %}
+                <div class="invalid-feedback d-block">{{ form.tags.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">{{ form.location.label }}</label>
+                {{ form.location|add_class:'form-control' }}
+                {% if form.location.errors %}
+                <div class="invalid-feedback d-block">{{ form.location.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ form.price.label }} <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                  {{ form.price|add_class:'form-control' }}
+                </div>
+                {% if form.price.errors %}
+                <div class="invalid-feedback d-block">{{ form.price.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.campus.label }}</label>
+                {{ form.campus|add_class:'form-select' }}
+                {% if form.campus.errors %}
+                <div class="invalid-feedback d-block">{{ form.campus.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Premium Listing</label>
+              <div class="form-check">
+                {{ form.premium|add_class:'form-check-input' }}
+                <label class="form-check-label">{{ form.premium.label }}</label>
+              </div>
+              {% if form.premium.errors %}
+              <div class="invalid-feedback d-block">{{ form.premium.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <hr>
+            <h5 class="mb-3"><i class="fas fa-images me-2"></i>Images <span class="text-danger">*</span></h5>
+            <p class="text-muted mb-3">Upload at least one image for your listing. You can upload up to 3 images.</p>
+            {{ formset.management_form }}
+            <div class="row g-3">
+              {% for image_form in formset %}
+              <div class="col-md-4 mb-2">
+                <div class="card h-100">
+                  <div class="card-body">
+                    {{ image_form.image.label_tag }}
+                    {{ image_form.image|add_class:'form-control' }}
+                    {% if image_form.instance.image %}
+                    <img src="{{ image_form.instance.image.url }}" class="img-thumbnail mt-2" style="max-height:120px;">
+                    {% endif %}
+                    <div class="form-check mt-2">
+                      {{ image_form.DELETE|add_class:'form-check-input' }}
+                      <label class="form-check-label">Delete</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="mt-4 d-flex justify-content-end">
+              <button type="submit" class="btn btn-success me-2"><i class="fas fa-save me-1"></i>Save</button>
+              <a href="{% url 'marketplace:home' %}" class="btn btn-secondary"><i class="fas fa-times me-1"></i>Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <button type="submit" class="btn btn-success">Save</button>
-    <a href="/" class="btn btn-secondary">Cancel</a>
-</form>
+  </div>
+</div>
 {% endblock %} 

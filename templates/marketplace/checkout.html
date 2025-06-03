@@ -1,30 +1,120 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Checkout | GZU Online Marketplace{% endblock %}
+
 {% block content %}
-<h2>Checkout</h2>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in items %}
-        <tr>
-            <td>{{ item.listing.title }}</td>
-            <td>${{ item.listing.price }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>${{ item.listing.price|floatformat:2|add:item.quantity|floatformat:2 }}</td>
-        </tr>
+<div class="container py-5">
+    <h1 class="h2 mb-4">Checkout</h1>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         {% endfor %}
-    </tbody>
-</table>
-<h4>Total: ${{ total }}</h4>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-success btn-lg">Simulate Payment (Ecocash)</button>
-</form>
-<a href="{% url 'view_cart' %}" class="btn btn-secondary mt-3">Back to Cart</a>
+    </div>
+    {% endif %}
+
+    {% if items %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Order Items</h5>
+                    {% for item in items %}
+                    <div class="d-flex align-items-center mb-4 pb-4 border-bottom">
+                        <div class="flex-shrink-0">
+                            <img src="{{ item.image_url|default:'/static/img/no-image.png' }}" 
+                                 class="rounded" 
+                                 alt="{{ item.title }}"
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1">{{ item.title }}</h6>
+                            <p class="text-muted mb-0">${{ item.price|intcomma }} × {{ item.quantity }}</p>
+                        </div>
+                        <div class="ms-3">
+                            <h6 class="mb-0">${{ item.subtotal|intcomma }}</h6>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Order Summary</h5>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Subtotal</span>
+                        <span>${{ total|intcomma }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Delivery Fee</span>
+                        <span>Free</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold">${{ total|intcomma }}</span>
+                    </div>
+                    
+                    <form method="POST" action="{% url 'marketplace:checkout' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="meetup_location" class="form-label">Preferred Meetup Location</label>
+                            <input type="text" class="form-control" id="meetup_location" name="meetup_location" required>
+                            <div class="form-text">Enter your preferred location to meet the seller</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="meetup_time" class="form-label">Preferred Meetup Time</label>
+                            <input type="datetime-local" class="form-control" id="meetup_time" name="meetup_time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message to Seller (Optional)</label>
+                            <textarea class="form-control" id="message" name="message" rows="3"></textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-lock me-2"></i>Complete Purchase
+                            </button>
+                            <a href="{% url 'marketplace:cart' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Cart
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+        <h3>Your cart is empty</h3>
+        <p class="text-muted">Add some items to your cart to start shopping!</p>
+        <a href="{% url 'marketplace:listings' %}" class="btn btn-primary">
+            <i class="fas fa-search me-2"></i>Browse Listings
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum datetime for meetup time to current time
+    const meetupTimeInput = document.getElementById('meetup_time');
+    if (meetupTimeInput) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        meetupTimeInput.min = now.toISOString().slice(0, 16);
+    }
+});
+</script>
 {% endblock %} 

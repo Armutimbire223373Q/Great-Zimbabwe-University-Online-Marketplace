@@ -1,33 +1,233 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load marketplace_extras %}
+
+{% block title %}Shopping Cart | GZU Online Marketplace{% endblock %}
+
 {% block content %}
-<h2>My Cart</h2>
-{% if items %}
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in items %}
-        <tr>
-            <td><a href="{% url 'listing_detail' item.listing.pk %}">{{ item.listing.title }}</a></td>
-            <td>${{ item.listing.price }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>${{ item.listing.price|floatformat:2|add:item.quantity|floatformat:2 }}</td>
-            <td><a href="{% url 'remove_from_cart' item.listing.pk %}" class="btn btn-danger btn-sm">Remove</a></td>
-        </tr>
+<div class="container py-5">
+    <h1 class="h2 mb-4">Shopping Cart</h1>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         {% endfor %}
-    </tbody>
-</table>
-<h4>Total: ${{ total }}</h4>
-<a href="{% url 'checkout' %}" class="btn btn-success btn-lg">Proceed to Checkout</a>
-{% else %}
-<p>Your cart is empty.</p>
-{% endif %}
-<a href="/" class="btn btn-secondary mt-3">Back to Marketplace</a>
+    </div>
+    {% endif %}
+
+    {% if items %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Cart Items</h5>
+                    {% for item in items %}
+                    <div class="cart-item mb-4 pb-4 border-bottom" data-listing-id="{{ item.listing_id }}">
+                        <div class="row align-items-center">
+                            <div class="col-3 col-md-2">
+                                {% if item.listing.images.first %}
+                                <img src="{{ item.listing.images.first.image.url }}" 
+                                     class="img-fluid rounded" 
+                                     alt="{{ item.listing.title }}"
+                                     style="width: 100px; height: 100px; object-fit: cover;">
+                                {% else %}
+                                <img src="{% static 'img/no-image.png' %}" 
+                                     class="img-fluid rounded" 
+                                     alt="No image"
+                                     style="width: 100px; height: 100px; object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            <div class="col-9 col-md-4">
+                                <h5 class="mb-1">{{ item.listing.title }}</h5>
+                                <p class="text-muted mb-0">Price: ${{ item.listing.price }}</p>
+                            </div>
+                            <div class="col-6 col-md-3 mt-3 mt-md-0">
+                                <div class="input-group">
+                                    <button class="btn btn-outline-secondary decrease-quantity" type="button">-</button>
+                                    <input type="number" class="form-control text-center quantity-input" 
+                                           value="{{ item.quantity }}" min="1" max="99">
+                                    <button class="btn btn-outline-secondary increase-quantity" type="button">+</button>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-2 text-end mt-3 mt-md-0">
+                                <p class="mb-0 fw-bold">${{ item.subtotal|intcomma }}</p>
+                            </div>
+                            <div class="col-12 col-md-1 text-end mt-3 mt-md-0">
+                                <button class="btn btn-link text-danger remove-item">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Order Summary</h5>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Subtotal</span>
+                        <span>${{ total|intcomma }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Delivery Fee</span>
+                        <span>Free</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold">${{ total|intcomma }}</span>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        <form method="POST" action="{% url 'marketplace:checkout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-lock me-2"></i>Proceed to Checkout
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Please sign in to complete your purchase
+                        </div>
+                        <a href="{% url 'account_login' %}?next={% url 'marketplace:checkout' %}" 
+                           class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In to Checkout
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+        <h3>Your cart is empty</h3>
+        <p class="text-muted">Add some items to your cart to start shopping!</p>
+        <a href="{% url 'marketplace:listings' %}" class="btn btn-primary">
+            <i class="fas fa-search me-2"></i>Browse Listings
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update quantity
+    function updateQuantity(listingId, quantity) {
+        fetch(`{% url 'marketplace:update_cart_quantity' listing_id=0 %}`.replace('0', listingId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: `quantity=${quantity}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Update cart count in navbar
+                document.querySelectorAll('.cart-count').forEach(el => {
+                    el.textContent = data.cart_count;
+                });
+                // Reload page to update totals
+                window.location.reload();
+            }
+        });
+    }
+
+    // Remove item
+    function removeItem(listingId) {
+        if (confirm('Are you sure you want to remove this item from your cart?')) {
+            fetch(`{% url 'marketplace:remove_from_cart' listing_id=0 %}`.replace('0', listingId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update cart count in navbar
+                    document.querySelectorAll('.cart-count').forEach(el => {
+                        el.textContent = data.cart_count;
+                    });
+                    // Reload page to update totals
+                    window.location.reload();
+                }
+            });
+        }
+    }
+
+    // Quantity buttons
+    document.querySelectorAll('.decrease-quantity').forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.nextElementSibling;
+            const value = parseInt(input.value);
+            if (value > 1) {
+                input.value = value - 1;
+                updateQuantity(this.closest('.cart-item').dataset.listingId, value - 1);
+            }
+        });
+    });
+
+    document.querySelectorAll('.increase-quantity').forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            const value = parseInt(input.value);
+            if (value < 99) {
+                input.value = value + 1;
+                updateQuantity(this.closest('.cart-item').dataset.listingId, value + 1);
+            }
+        });
+    });
+
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            if (value >= 1 && value <= 99) {
+                updateQuantity(this.closest('.cart-item').dataset.listingId, value);
+            } else {
+                this.value = 1;
+                updateQuantity(this.closest('.cart-item').dataset.listingId, 1);
+            }
+        });
+    });
+
+    // Remove buttons
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function() {
+            const listingId = this.closest('.cart-item').dataset.listingId;
+            removeItem(listingId);
+        });
+    });
+
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
 {% endblock %} 

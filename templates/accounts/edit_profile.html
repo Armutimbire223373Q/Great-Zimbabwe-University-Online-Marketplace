@@ -1,24 +1,243 @@
 {% extends 'base.html' %}
 {% block title %}Edit Profile | GZU Online Marketplace{% endblock %}
 {% block content %}
-<h2>Edit Profile</h2>
-{% if messages %}
-<div class="mt-3">
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Edit Profile
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if form.instance.profile_pic %}
+                    <div class="text-center mb-4">
+                        <div class="profile-pic-wrapper">
+                            <img src="{{ form.instance.profile_pic.url }}" 
+                                 alt="Current Profile Picture" 
+                                 class="profile-pic">
+                            <div class="profile-pic-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" aria-label="Edit profile form" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-bold">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            {{ field.errors }}
+                            <div class="form-control-wrapper">
+                                {{ field }}
+                            </div>
+                            {% if field.help_text %}
+                            <div class="form-text text-muted mt-1">
+                                <i class="fas fa-info-circle me-1"></i>{{ field.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <div class="d-flex gap-3 mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary btn-lg px-4">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endfor %}
 </div>
-{% endif %}
-{% if form.instance.profile_pic %}
-<img src="{{ form.instance.profile_pic.url }}" alt="Current Profile Picture" class="img-thumbnail mb-3" style="max-width: 150px;">
-{% endif %}
-<form method="post" enctype="multipart/form-data" aria-label="Edit profile form">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save Changes</button>
-    <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
-</form>
+
+<style>
+    /* Profile picture styles */
+    .profile-pic-wrapper {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .profile-pic-wrapper:hover {
+        transform: scale(1.05);
+    }
+
+    .profile-pic {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: filter 0.3s ease;
+    }
+
+    .profile-pic-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .profile-pic-overlay i {
+        color: white;
+        font-size: 2rem;
+    }
+
+    .profile-pic-wrapper:hover .profile-pic-overlay {
+        opacity: 1;
+    }
+
+    /* Form field styles */
+    .form-control-wrapper input,
+    .form-control-wrapper select,
+    .form-control-wrapper textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 2px solid #e9ecef;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .form-control-wrapper input:hover,
+    .form-control-wrapper select:hover,
+    .form-control-wrapper textarea:hover {
+        border-color: #dee2e6;
+    }
+
+    .form-control-wrapper input:focus,
+    .form-control-wrapper select:focus,
+    .form-control-wrapper textarea:focus {
+        color: #212529;
+        background-color: #fff;
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+
+    .form-control-wrapper input[type="file"] {
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        cursor: pointer;
+    }
+
+    .form-control-wrapper input[type="file"]:hover {
+        border-color: #adb5bd;
+        background-color: #e9ecef;
+    }
+
+    .form-control-wrapper ul {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .form-control-wrapper ul li {
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control-wrapper ul li label {
+        margin-bottom: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control-wrapper ul li label input[type="radio"],
+    .form-control-wrapper ul li label input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+
+    /* Button styles */
+    .btn {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-secondary {
+        border-color: #6c757d;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        transform: translateY(-1px);
+    }
+
+    /* Alert styles */
+    .alert {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    /* Card styles */
+    .card {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .card-header {
+        border-bottom: none;
+    }
+</style>
 {% endblock %} 

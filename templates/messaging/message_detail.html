@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Message Detail{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Message Thread</h5>
+                    <a href="{% url 'messaging:inbox' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back to Inbox
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Message Thread -->
+                    <div class="message-thread mb-4">
+                        {% for msg in thread %}
+                            <div class="message {% if msg.sender == request.user %}message-sent{% else %}message-received{% endif %} mb-3">
+                                <div class="message-header d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <strong>{{ msg.sender.get_full_name|default:msg.sender.username }}</strong>
+                                        <small class="text-muted ms-2">{{ msg.created_at|timesince }} ago</small>
+                                    </div>
+                                    {% if msg.is_read %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-check-double"></i> Read
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <div class="message-content p-3 rounded {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}">
+                                    {{ msg.content|linebreaks }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Reply Form -->
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.content }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .message-sent {
+        margin-left: 20%;
+    }
+    .message-received {
+        margin-right: 20%;
+    }
+    .message-content {
+        word-wrap: break-word;
+    }
+</style>
+{% endblock %} 

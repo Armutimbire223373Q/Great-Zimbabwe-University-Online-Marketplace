@@ -12,13 +12,15 @@
     {% for listing in listings %}
     <div class="col-md-4 mb-3">
         <div class="card h-100 category-card">
-            {% if listing.image %}
-            <img src="{{ listing.image.url }}" class="card-img-top" alt="{{ listing.title|escape }}" loading="lazy">
+            {% if listing.images.first %}
+            <img src="{{ listing.images.first.image.url }}" class="card-img-top" alt="{{ listing.title|escape }}" loading="lazy">
+            {% else %}
+            <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="No image available">
             {% endif %}
             <div class="card-body">
                 <h5 class="card-title">{{ listing.title|escape }}</h5>
                 <p class="card-text">${{ listing.price }}<br><span class="badge bg-secondary">{{ listing.campus|escape }}</span></p>
-                <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary">View</a>
+                <a href="{% url 'marketplace:listing_detail' listing.pk %}" class="btn btn-primary">View</a>
             </div>
         </div>
     </div>

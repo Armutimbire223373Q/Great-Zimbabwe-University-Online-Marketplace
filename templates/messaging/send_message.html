@@ -5,6 +5,6 @@
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Send</button>
-    <a href="/messages/" class="btn btn-secondary">Cancel</a>
+    <a href="{% url 'messaging:inbox' %}" class="btn btn-secondary">Cancel</a>
 </form>
 {% endblock %} 

@@ -1,0 +1,792 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome to GZU Online Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, var(--bs-primary) 0%, #2c3e50 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('{% static "img/pattern.png" %}') repeat;
+        opacity: 0.1;
+    }
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+    .search-bar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    .search-bar.scrolled {
+        padding: 0.5rem 0;
+    }
+    .filter-bar {
+        background: #f8f9fa;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #dee2e6;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    .filter-bar::-webkit-scrollbar {
+        display: none;
+    }
+    .filter-item {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin-right: 0.5rem;
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #dee2e6;
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .filter-item:hover, .filter-item.active {
+        background: var(--bs-primary);
+        color: white;
+        border-color: var(--bs-primary);
+    }
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 1rem;
+        padding: 1rem 0;
+    }
+    .category-item {
+        text-align: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        position: relative;
+    }
+    .category-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .category-item i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: var(--bs-primary);
+    }
+    .listing-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+        height: 100%;
+        background: white;
+    }
+    .listing-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .listing-card img {
+        height: 200px;
+        object-fit: cover;
+    }
+    .listing-card .card-body {
+        padding: 1rem;
+    }
+    .listing-card .card-title {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #212529;
+    }
+    .listing-card .price {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--bs-primary);
+    }
+    .swiper-container {
+        padding: 1rem 0;
+    }
+    .swiper-slide {
+        width: 280px;
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #212529;
+    }
+    .section-title i {
+        color: var(--bs-primary);
+    }
+    .listing-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        z-index: 1;
+    }
+    .badge-premium {
+        background: #ffd700;
+        color: #000;
+    }
+    .badge-new {
+        background: #28a745;
+        color: white;
+    }
+    .badge-hot {
+        background: #dc3545;
+        color: white;
+    }
+    .listing-actions {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 1;
+    }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: #495057;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .action-btn:hover {
+        background: white;
+        color: var(--bs-primary);
+        transform: scale(1.1);
+    }
+    .category-count {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: var(--bs-primary);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+    }
+    .countdown-timer {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+    }
+    .trending-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    .trending-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: #212529;
+        background: white;
+    }
+    .trending-item:hover {
+        background: #f8f9fa;
+    }
+    .trending-rank {
+        font-weight: 600;
+        color: var(--bs-primary);
+    }
+    .trending-item .price {
+        color: var(--bs-primary);
+        font-weight: 600;
+    }
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+        padding: 0.5rem 0;
+    }
+    .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #6c757d;
+        text-decoration: none;
+        padding: 0.5rem;
+    }
+    .bottom-nav-item.active {
+        color: var(--bs-primary);
+    }
+    .bottom-nav-item i {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+    .fab {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--bs-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+        z-index: 1000;
+    }
+    .fab:hover {
+        transform: scale(1.1);
+        color: white;
+    }
+    .fab i {
+        font-size: 1.5rem;
+    }
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 4px;
+    }
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    .loading-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--bs-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .offline-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #dc3545;
+        color: white;
+        text-align: center;
+        padding: 0.5rem;
+        z-index: 9999;
+        display: none;
+    }
+    .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: var(--bs-primary);
+        color: white;
+        padding: 8px;
+        z-index: 100;
+        transition: top 0.3s;
+    }
+    .skip-link:focus {
+        top: 0;
+    }
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+        .category-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+        .category-item {
+            padding: 0.75rem;
+        }
+        .category-item i {
+            font-size: 1.5rem;
+        }
+        .listing-card img {
+            height: 160px;
+        }
+        .bottom-nav {
+            padding: 0.5rem;
+        }
+        .bottom-nav-item i {
+            font-size: 1.1rem;
+        }
+        .bottom-nav-item .small {
+            font-size: 0.75rem;
+        }
+        .fab {
+            width: 48px;
+            height: 48px;
+            bottom: 70px;
+            right: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="hero-title">Welcome to GZU Marketplace</h1>
+            <p class="hero-subtitle">Buy, sell, and exchange items within the GZU community</p>
+            <form action="{% url 'marketplace:search' %}" method="get" class="d-flex justify-content-center">
+                <div class="input-group" style="max-width: 600px;">
+                    <input type="search" class="form-control form-control-lg" placeholder="Search for items..." name="q">
+                    <button class="btn btn-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <div class="container">
+        <div class="d-flex">
+            <a href="?campus=main" class="filter-item {% if request.GET.campus == 'main' %}active{% endif %}">
+                <i class="fas fa-university me-1"></i> Main Campus
+            </a>
+            <a href="?campus=mashava" class="filter-item {% if request.GET.campus == 'mashava' %}active{% endif %}">
+                <i class="fas fa-building me-1"></i> Mashava
+            </a>
+            <a href="?campus=city" class="filter-item {% if request.GET.campus == 'city' %}active{% endif %}">
+                <i class="fas fa-city me-1"></i> City
+            </a>
+            <a href="?sort=newest" class="filter-item {% if request.GET.sort == 'newest' %}active{% endif %}">
+                <i class="fas fa-clock me-1"></i> Newest
+            </a>
+            <a href="?sort=price_low" class="filter-item {% if request.GET.sort == 'price_low' %}active{% endif %}">
+                <i class="fas fa-arrow-down me-1"></i> Price: Low to High
+            </a>
+            <a href="?sort=price_high" class="filter-item {% if request.GET.sort == 'price_high' %}active{% endif %}">
+                <i class="fas fa-arrow-up me-1"></i> Price: High to Low
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+    <!-- Featured Listings -->
+    <section class="mb-5">
+        <h5 class="section-title">
+            <i class="fas fa-star"></i> Featured Listings
+        </h5>
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                {% for listing in featured_listings %}
+                <div class="swiper-slide">
+                    <a href="{% url 'marketplace:listing_detail' listing.pk %}" class="text-decoration-none">
+                        <div class="card listing-card">
+                            {% if listing.images.exists %}
+                                <img src="{{ listing.images.first.image.url }}" class="card-img-top" alt="{{ listing.title }}">
+                            {% else %}
+                                <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="No image available">
+                            {% endif %}
+                            <div class="card-body">
+                                <h6 class="card-title text-dark">{{ listing.title }}</h6>
+                                <p class="price mb-2">${{ listing.price }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i> {{ listing.owner.get_full_name }}
+                                    <i class="fas fa-map-marker-alt ms-2 me-1"></i> {{ listing.campus }}
+                                </small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    </section>
+
+    <!-- Quick Access Categories -->
+    <section class="mb-5">
+        <h5 class="section-title">
+            <i class="fas fa-th-large"></i> Categories
+        </h5>
+        <div class="category-grid">
+            {% for category in categories %}
+            <a href="{% url 'marketplace:home' %}?category={{ category.name }}" class="category-item">
+                <span class="category-count">{{ category.listings.count }}</span>
+                <i class="fas {{ category.icon }}"></i>
+                <div class="text-dark">{{ category.name }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Trending Section -->
+    <section class="trending-section mb-5">
+        <h5 class="section-title">
+            <i class="fas fa-chart-line"></i> Trending Now
+        </h5>
+        {% for listing in trending_listings %}
+        <a href="{% url 'marketplace:listing_detail' listing.pk %}" class="trending-item">
+            <div class="trending-rank">#{{ forloop.counter }}</div>
+            {% if listing.images.exists %}
+                <img src="{{ listing.images.first.image.url }}" class="rounded" style="width: 48px; height: 48px; object-fit: cover;">
+            {% endif %}
+            <div class="flex-grow-1">
+                <h6 class="mb-0 text-dark">{{ listing.title }}</h6>
+                <small class="text-muted">{{ listing.views }} views today</small>
+            </div>
+            <div class="price">${{ listing.price }}</div>
+        </a>
+        {% endfor %}
+    </section>
+
+    <!-- Recently Viewed -->
+    {% if recently_viewed %}
+    <section class="recently-viewed mb-5">
+        <h5 class="section-title">
+            <i class="fas fa-history"></i> Recently Viewed
+        </h5>
+        <div class="row g-3">
+            {% for listing in recently_viewed %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card listing-card">
+                    {% if listing.images.exists %}
+                        <img src="{{ listing.images.first.image.url }}" class="card-img-top" alt="{{ listing.title }}">
+                    {% else %}
+                        <img src="{% static 'img/no-image.png' %}" class="card-img-top" alt="No image available">
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="card-title">{{ listing.title }}</h6>
+                        <p class="price mb-2">${{ listing.price }}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i> {{ listing.owner.get_full_name }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Pull to Refresh Indicator -->
+<div class="pull-to-refresh">
+    <i class="fas fa-sync-alt"></i>
+    <span>Pull to refresh</span>
+</div>
+
+<!-- Floating Action Button -->
+<a href="{% url 'marketplace:create_listing' %}" class="fab" title="Create New Listing">
+    <i class="fas fa-plus"></i>
+</a>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <div class="row g-0">
+        <div class="col">
+            <a href="{% url 'home' %}" class="bottom-nav-item active">
+                <i class="fas fa-home"></i>
+                <div class="small">Home</div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{% url 'marketplace:my_listings' %}" class="bottom-nav-item">
+                <i class="fas fa-list"></i>
+                <div class="small">My Listings</div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{% url 'marketplace:create_listing' %}" class="bottom-nav-item">
+                <i class="fas fa-plus"></i>
+                <div class="small">Post</div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{% url 'messaging:inbox' %}" class="bottom-nav-item">
+                <i class="fas fa-envelope"></i>
+                <div class="small">Messages</div>
+                {% if unread_messages_count > 0 %}
+                    <span class="badge bg-danger">{{ unread_messages_count }}</span>
+                {% endif %}
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<!-- Skip Link for Accessibility -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Offline Banner -->
+<div class="offline-banner" role="alert" aria-live="polite">
+    <i class="fas fa-wifi-slash"></i>
+    You are currently offline. Some features may be limited.
+</div>
+
+<!-- Error Message Container -->
+<div id="error-container" class="container" role="alert" aria-live="polite"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Swiper
+        new Swiper('.swiper-container', {
+            slidesPerView: 1,
+            spaceBetween: 20,
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 2,
+                },
+                768: {
+                    slidesPerView: 3,
+                },
+                1024: {
+                    slidesPerView: 4,
+                },
+            },
+        });
+
+        // Handle search bar scroll effect
+        const searchBar = document.querySelector('.search-bar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                searchBar.classList.add('scrolled');
+            } else {
+                searchBar.classList.remove('scrolled');
+            }
+        });
+
+        // Initialize countdown timers
+        document.querySelectorAll('[data-countdown]').forEach(element => {
+            const endTime = moment(element.dataset.countdown);
+            const updateTimer = () => {
+                const now = moment();
+                const diff = endTime.diff(now);
+                if (diff <= 0) {
+                    element.textContent = 'Expired';
+                    return;
+                }
+                const duration = moment.duration(diff);
+                const hours = Math.floor(duration.asHours());
+                const minutes = duration.minutes();
+                element.textContent = `${hours}h ${minutes}m`;
+            };
+            updateTimer();
+            setInterval(updateTimer, 60000);
+        });
+
+        // Infinite Scroll Implementation
+        let currentPage = 1;
+        let isLoading = false;
+        let hasMore = true;
+        const container = document.getElementById('listings-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const endOfListings = document.getElementById('end-of-listings');
+        const errorContainer = document.getElementById('error-container');
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message animate-slide-in';
+            errorDiv.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${message}</span>
+            `;
+            errorContainer.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        // Show loading state
+        function showLoading() {
+            isLoading = true;
+            loadingIndicator.classList.remove('d-none');
+        }
+
+        // Hide loading state
+        function hideLoading() {
+            isLoading = false;
+            loadingIndicator.classList.add('d-none');
+        }
+
+        // Load more listings
+        async function loadMoreListings() {
+            if (isLoading || !hasMore) return;
+            showLoading();
+            try {
+                const response = await fetch(`/marketplace/listings/?page=${currentPage + 1}`);
+                const data = await response.json();
+                if (data.listings.length === 0) {
+                    hasMore = false;
+                    endOfListings.classList.remove('d-none');
+                } else {
+                    currentPage++;
+                    data.listings.forEach(listing => {
+                        const listingElement = createListingElement(listing);
+                        container.appendChild(listingElement);
+                    });
+                }
+            } catch (error) {
+                showError('Failed to load more listings. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Create listing element
+        function createListingElement(listing) {
+            const div = document.createElement('div');
+            div.className = 'col-6 col-md-4 col-lg-3';
+            div.innerHTML = `
+                <div class="card listing-card">
+                    <img src="${listing.image_url || '/static/img/no-image.png'}" class="card-img-top" alt="${listing.title}">
+                    <div class="card-body">
+                        <h6 class="card-title">${listing.title}</h6>
+                        <p class="price mb-2">$${listing.price}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i> ${listing.owner_name}
+                        </small>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        // Intersection Observer for infinite scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && hasMore) {
+                    loadMoreListings();
+                }
+            });
+        });
+
+        if (endOfListings) {
+            observer.observe(endOfListings);
+        }
+
+        // Offline detection
+        window.addEventListener('online', () => {
+            document.querySelector('.offline-banner').style.display = 'none';
+        });
+
+        window.addEventListener('offline', () => {
+            document.querySelector('.offline-banner').style.display = 'block';
+        });
+
+        // Pull to refresh
+        let touchStartY = 0;
+        let touchEndY = 0;
+        const pullToRefresh = document.querySelector('.pull-to-refresh');
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            touchEndY = e.touches[0].clientY;
+            const pullDistance = touchEndY - touchStartY;
+            if (window.scrollY === 0 && pullDistance > 0) {
+                pullToRefresh.style.transform = `translateY(${Math.min(pullDistance / 2, 100)}px)`;
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            if (window.scrollY === 0 && touchEndY - touchStartY > 100) {
+                window.location.reload();
+            }
+            pullToRefresh.style.transform = '';
+        });
+    });
+</script>
+{% endblock %} 

@@ -8,8 +8,8 @@
             <h5 class="fw-bold">Profile Overview</h5>
             <p class="mb-1"><strong>Username:</strong> {{ user.username|escape }}</p>
             <p class="mb-1"><strong>Email:</strong> {{ user.email|escape }}</p>
-            <p class="mb-1"><strong>Campus:</strong> {{ user.userprofile.campus|escape }}</p>
-            <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-sm mt-2">View Profile</a>
+            <p class="mb-1"><strong>Campus:</strong> {{ user.campus|escape }}</p>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary btn-sm mt-2">View Profile</a>
         </div>
         <div class="card p-3 mb-3">
             <h6 class="fw-bold">Quick Links</h6>
@@ -33,7 +33,7 @@
                         <div class="card-body">
                             <h6 class="card-title">{{ listing.title|escape }}</h6>
                             <p class="mb-1">${{ listing.price }} <span class="badge bg-secondary ms-2">{{ listing.campus|escape }}</span></p>
-                            <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary btn-sm">View</a>
+                            <a href="{% url 'marketplace:listing_detail' listing.pk %}" class="btn btn-primary btn-sm">View</a>
                             <a href="{% url 'edit_listing' listing.pk %}" class="btn btn-warning btn-sm ms-2">Edit</a>
                             <a href="{% url 'delete_listing' listing.pk %}" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Are you sure you want to delete this listing?');">Delete</a>
                         </div>

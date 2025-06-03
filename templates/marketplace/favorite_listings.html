@@ -15,7 +15,7 @@
                     {% if listing.premium %}<span class="badge bg-warning text-dark">Premium</span>{% endif %}
                 </h5>
                 <p class="card-text">${{ listing.price }}<br><small class="text-muted">{{ listing.campus|escape }}</small></p>
-                <a href="{% url 'listing_detail' listing.pk %}" class="btn btn-primary">View</a>
+                <a href="{% url 'marketplace:listing_detail' listing.pk %}" class="btn btn-primary">View</a>
             </div>
         </div>
     </div>
